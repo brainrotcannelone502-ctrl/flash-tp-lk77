@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "Flash_TP_LK7_V11"
+sg.Name = "Flash_TP_LK7_V12"
 sg.ResetOnSpawn = false
 
 local TECLA_TOGGLE = Enum.KeyCode.P
@@ -19,7 +19,7 @@ TopBar.Size = UDim2.new(1, 0, 0, 50)
 TopBar.BackgroundTransparency = 1
 
 local Title = Instance.new("TextLabel", TopBar)
-Title.Text = "FLASH TP LK7 - V11"
+Title.Text = "FLASH TP LK7 - V12 (FIXED)"
 Title.Size = UDim2.new(0, 300, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.TextColor3 = Color3.fromRGB(255, 200, 0)
@@ -50,7 +50,6 @@ local function CreateAction(name, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- FUNÇÃO X-RAY
 CreateAction("Visual: Bases X-Ray", function()
     XrayAtivado = not XrayAtivado
     for _, obj in pairs(game.Workspace:GetDescendants()) do
@@ -68,30 +67,43 @@ CreateAction("Visual: Bases X-Ray", function()
     end
 end)
 
--- FUNÇÃO FLASH INSTANTÂNEO CORRIGIDA
 CreateAction("Flash Instantâneo", function()
     local char = player.Character
-    local hum = char:FindFirstChildOfClass("Humanoid")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+
+    local tool = nil
+    local items = player.Backpack:GetChildren()
+    local hand = char:GetChildren()
     
-    -- Busca exata pelo nome que você passou
-    local tool = player.Backpack:FindFirstChild("flash teleport") or char:FindFirstChild("flash teleport")
+    for _, v in pairs(items) do
+        if v:IsA("Tool") and (v.Name:lower():find("flash") or v.Name:lower():find("teleport")) then
+            tool = v
+            break
+        end
+    end
     
-    -- Caso o jogo use letras maiúsculas (Flash Teleport)
     if not tool then
-        for _, v in pairs(player.Backpack:GetChildren()) do
-            if v.Name:lower() == "flash teleport" then
+        for _, v in pairs(hand) do
+            if v:IsA("Tool") and (v.Name:lower():find("flash") or v.Name:lower():find("teleport")) then
                 tool = v
                 break
             end
         end
     end
 
-    if tool and hum then
-        hum:UnequipTools() -- Larga o Brainrot
+    if tool then
+        hum:UnequipTools()
+        task.wait(0.03)
+        
+        tool.Parent = char
+        task.wait(0.07)
+        
+        tool:Activate()
         task.wait(0.05)
-        hum:EquipTool(tool) -- Pega o Flash Teleport
-        task.wait(0.1)
-        tool:Activate() -- Teleporta
+        tool:Activate()
+        task.wait(0.05)
+        tool:Activate()
     end
 end)
 
