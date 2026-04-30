@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "Flash_TP_LK7_Final"
+sg.Name = "Flash_TP_LK7_V10"
 sg.ResetOnSpawn = false
 
 local TECLA_TOGGLE = Enum.KeyCode.P
@@ -19,7 +19,7 @@ TopBar.Size = UDim2.new(1, 0, 0, 50)
 TopBar.BackgroundTransparency = 1
 
 local Title = Instance.new("TextLabel", TopBar)
-Title.Text = "FLASH TP LK7 - PREMIUM"
+Title.Text = "FLASH TP LK7 - PREMIUM V10"
 Title.Size = UDim2.new(0, 300, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.TextColor3 = Color3.fromRGB(255, 200, 0)
@@ -50,7 +50,6 @@ local function CreateAction(name, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- FUNÇÃO X-RAY
 CreateAction("Visual: Bases X-Ray", function()
     XrayAtivado = not XrayAtivado
     for _, obj in pairs(game.Workspace:GetDescendants()) do
@@ -68,32 +67,18 @@ CreateAction("Visual: Bases X-Ray", function()
     end
 end)
 
--- FUNÇÃO FLASH CORRIGIDA (BUSCA POR NOME PARCIAL)
 CreateAction("Flash Instantâneo", function()
     local char = player.Character
-    local tool = nil
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    -- Busca o item Flash no inventário ou na mão
+    local tool = player.Backpack:FindFirstChild("Flash") or char:FindFirstChild("Flash") or player.Backpack:FindFirstChild("Flash TP")
     
-    -- Busca no inventário ou na mão por qualquer item que contenha "Flash" no nome
-    for _, v in pairs(player.Backpack:GetChildren()) do
-        if v:IsA("Tool") and v.Name:find("Flash") then
-            tool = v
-            break
-        end
-    end
-    
-    if not tool then
-        for _, v in pairs(char:GetChildren()) do
-            if v:IsA("Tool") and v.Name:find("Flash") then
-                tool = v
-                break
-            end
-        end
-    end
-
-    if tool then
-        char.Humanoid:EquipTool(tool)
-        task.wait(0.05)
-        tool:Activate() -- Aciona o teleporte/atravessar parede
+    if tool and hum then
+        hum:UnequipTools() -- Solta o Brainrot
+        task.wait(0.05)    -- Espera a mão liberar
+        hum:EquipTool(tool) -- Puxa o Flash
+        task.wait(0.1)     -- Espera equipar
+        tool:Activate()    -- Ativa o teleporte
     end
 end)
 
