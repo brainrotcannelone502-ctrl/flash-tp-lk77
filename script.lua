@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "Flash_TP_LK7_V9"
+sg.Name = "Flash_TP_LK7_Final"
 sg.ResetOnSpawn = false
 
 local TECLA_TOGGLE = Enum.KeyCode.P
@@ -50,10 +50,10 @@ local function CreateAction(name, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
+-- FUNÇÃO X-RAY
 CreateAction("Visual: Bases X-Ray", function()
     XrayAtivado = not XrayAtivado
-    local workspace = game:GetService("Workspace")
-    for _, obj in pairs(workspace:GetDescendants()) do
+    for _, obj in pairs(game.Workspace:GetDescendants()) do
         if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) then
             if XrayAtivado then
                 if obj.Transparency < 0.5 then
@@ -68,13 +68,32 @@ CreateAction("Visual: Bases X-Ray", function()
     end
 end)
 
+-- FUNÇÃO FLASH CORRIGIDA (BUSCA POR NOME PARCIAL)
 CreateAction("Flash Instantâneo", function()
-    local character = player.Character
-    local flashItem = player.Backpack:FindFirstChild("Flash") or character:FindFirstChild("Flash")
-    if flashItem then
-        player.Character.Humanoid:EquipTool(flashItem)
-        task.wait(0.1)
-        flashItem:Activate()
+    local char = player.Character
+    local tool = nil
+    
+    -- Busca no inventário ou na mão por qualquer item que contenha "Flash" no nome
+    for _, v in pairs(player.Backpack:GetChildren()) do
+        if v:IsA("Tool") and v.Name:find("Flash") then
+            tool = v
+            break
+        end
+    end
+    
+    if not tool then
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("Tool") and v.Name:find("Flash") then
+                tool = v
+                break
+            end
+        end
+    end
+
+    if tool then
+        char.Humanoid:EquipTool(tool)
+        task.wait(0.05)
+        tool:Activate() -- Aciona o teleporte/atravessar parede
     end
 end)
 
