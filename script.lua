@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "Flash_TP_LK7_V16"
+sg.Name = "Flash_TP_LK7_V17"
 sg.ResetOnSpawn = false
 
 local TECLA_TOGGLE = Enum.KeyCode.P
@@ -19,7 +19,7 @@ TopBar.Size = UDim2.new(1, 0, 0, 50)
 TopBar.BackgroundTransparency = 1
 
 local Title = Instance.new("TextLabel", TopBar)
-Title.Text = "FLASH TP LK7 - V16 (HYPER-DRIVE)"
+Title.Text = "FLASH TP LK7 - V17 (NO-CLIP FIX)"
 Title.Size = UDim2.new(0, 300, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.TextColor3 = Color3.fromRGB(255, 200, 0)
@@ -82,16 +82,30 @@ CreateAction("Flash Instantâneo", function()
     end
 
     if tool then
+        -- 1. LIMPA A MÃO
         hum:UnequipTools()
-        
-        local pos_atual = hrp.CFrame
-        hrp.CFrame = pos_atual + (pos_atual.LookVector * 7)
-        
-        tool.Parent = char
         task.wait(0.05)
+        
+        -- 2. DESATIVA COLISÃO TEMPORARIAMENTE (EVITA VOLTAR PARA TRÁS)
+        local connection
+        connection = game:GetService("RunService").Stepped:Connect(function()
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end)
+
+        -- 3. EQUIPA E USA O ITEM
+        tool.Parent = char
+        task.wait(0.1)
         tool:Activate()
         
-        hrp.Velocity = Vector3.new(0, 10, 0) 
+        -- 4. DESLIZA PARA FORA
+        hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * 6)
+        
+        -- 5. REATIVA COLISÃO APÓS SAIR
+        task.delay(1, function()
+            connection:Disconnect()
+        end)
     end
 end)
 
