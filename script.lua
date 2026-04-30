@@ -1,6 +1,6 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "Flash_TP_LK7_V13"
+sg.Name = "Flash_TP_LK7_V14"
 sg.ResetOnSpawn = false
 
 local TECLA_TOGGLE = Enum.KeyCode.P
@@ -19,7 +19,7 @@ TopBar.Size = UDim2.new(1, 0, 0, 50)
 TopBar.BackgroundTransparency = 1
 
 local Title = Instance.new("TextLabel", TopBar)
-Title.Text = "FLASH TP LK7 - V13 (BYPASS)"
+Title.Text = "FLASH TP LK7 - V14 (ANTI-REVERT)"
 Title.Size = UDim2.new(0, 300, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.TextColor3 = Color3.fromRGB(255, 200, 0)
@@ -70,8 +70,7 @@ end)
 CreateAction("Flash Instantâneo", function()
     local char = player.Character
     local hum = char and char:FindFirstChildOfClass("Humanoid")
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hum or not hrp then return end
+    if not hum then return end
 
     local tool = player.Backpack:FindFirstChild("flash teleport") or char:FindFirstChild("flash teleport")
     
@@ -83,14 +82,14 @@ CreateAction("Flash Instantâneo", function()
 
     if tool then
         hum:UnequipTools()
-        task.wait(0.01)
-        
-        local direction = hrp.CFrame.LookVector
-        hrp.CFrame = hrp.CFrame + (direction * 5)
+        task.wait(0.02)
         
         tool.Parent = char
-        task.wait(0.05)
-        tool:Activate()
+        
+        for i = 1, 5 do
+            tool:Activate()
+            task.wait(0.01)
+        end
     end
 end)
 
