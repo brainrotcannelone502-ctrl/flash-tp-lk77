@@ -1,60 +1,107 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "Flash_TP_LK7_V17"
+sg.Name = "BK_Flash_Steal_UI"
 sg.ResetOnSpawn = false
 
-local TECLA_TOGGLE = Enum.KeyCode.P
 local XrayAtivado = false
+local FlashAtivado = false
 
+-- JANELA PRINCIPAL (ESTILO DARK/RED DA IMAGEM)
 local Main = Instance.new("Frame", sg)
-Main.Size = UDim2.new(0, 550, 0, 380)
-Main.Position = UDim2.new(0.5, -275, 0.5, -190)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+Main.Size = UDim2.new(0, 260, 0, 320)
+Main.Position = UDim2.new(0.5, -130, 0.4, 0)
+Main.BackgroundColor3 = Color3.fromRGB(15, 18, 22) -- Fundo quase preto
+Main.BorderSizePixel = 2
+Main.BorderColor3 = Color3.fromRGB(255, 0, 0) -- Borda vermelha
 Main.Active = true
 Main.Draggable = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
-local TopBar = Instance.new("Frame", Main)
-TopBar.Size = UDim2.new(1, 0, 0, 50)
-TopBar.BackgroundTransparency = 1
-
-local Title = Instance.new("TextLabel", TopBar)
-Title.Text = "FLASH TP LK7 - V17 (NO-CLIP FIX)"
-Title.Size = UDim2.new(0, 300, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
-Title.TextColor3 = Color3.fromRGB(255, 200, 0)
+local Title = Instance.new("TextLabel", Main)
+Title.Text = "BK'S Flash Steal 🩸"
+Title.Size = UDim2.new(1, -10, 0, 40)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 
+local Line = Instance.new("Frame", Main)
+Line.Size = UDim2.new(1, 0, 0, 1)
+Line.Position = UDim2.new(0, 0, 0, 40)
+Line.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Line.BorderSizePixel = 0
+
+-- CONTAINER DOS BOTÕES
 local Content = Instance.new("Frame", Main)
-Content.Size = UDim2.new(1, -20, 1, -70)
-Content.Position = UDim2.new(0, 10, 0, 60)
-Content.BackgroundColor3 = Color3.fromRGB(20, 21, 28)
-Instance.new("UICorner", Content).CornerRadius = UDim.new(0, 8)
+Content.Size = UDim2.new(1, 0, 1, -45)
+Content.Position = UDim2.new(0, 0, 0, 45)
+Content.BackgroundTransparency = 1
 
-local ContentLayout = Instance.new("UIGridLayout", Content)
-ContentLayout.CellSize = UDim2.new(0.48, 0, 0, 45)
-ContentLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
-ContentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local UIList = Instance.new("UIListLayout", Content)
+UIList.Padding = UDim.new(0, 8)
+UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local function CreateAction(name, callback)
+-- FUNÇÃO PARA CRIAR BOTÃO IGUAL DA IMAGEM
+local function CreateButton(name, callback)
     local btn = Instance.new("TextButton", Content)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 36, 45)
-    btn.Text = name
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.GothamMedium
+    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 28, 32)
+    btn.BorderSizePixel = 0
+    btn.Text = name .. ": OFF"
+    btn.TextColor3 = Color3.fromRGB(255, 0, 0)
+    btn.Font = Enum.Font.GothamBold
     btn.TextSize = 13
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-    btn.MouseButton1Click:Connect(callback)
+    
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = name .. (state and ": ON" or ": OFF")
+        btn.TextColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        callback(state)
+    end)
 end
 
-CreateAction("Visual: Bases X-Ray", function()
-    XrayAtivado = not XrayAtivado
+-- LÓGICA DE TELEPORTE (V17 FIX)
+local function ExecutarFlash()
+    local char = player.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return end
+
+    local tool = player.Backpack:FindFirstChild("flash teleport") or char:FindFirstChild("flash teleport")
+    if not tool then return end
+
+    hum:UnequipTools()
+    task.wait(0.05)
+    
+    local connection
+    connection = game:GetService("RunService").Stepped:Connect(function()
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end)
+
+    tool.Parent = char
+    task.wait(0.1)
+    tool:Activate()
+    hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * 7)
+    
+    task.delay(1, function()
+        if connection then connection:Disconnect() end
+    end)
+end
+
+-- CRIAÇÃO DOS ELEMENTOS DA UI
+CreateButton("FLASH TP", function(v) 
+    FlashAtivado = v 
+    if v then ExecutarFlash() end 
+end)
+
+CreateButton("X-RAY BASES", function(v)
     for _, obj in pairs(game.Workspace:GetDescendants()) do
         if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) then
-            if XrayAtivado then
+            if v then
                 if obj.Transparency < 0.5 then
                     obj.Transparency = 0.7
                     obj.Material = Enum.Material.ForceField
@@ -67,48 +114,27 @@ CreateAction("Visual: Bases X-Ray", function()
     end
 end)
 
-CreateAction("Flash Instantâneo", function()
-    local char = player.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hum or not hrp then return end
+-- DECORAÇÃO (SLIDERS FALSOS PARA FICAR IGUAL A IMAGEM)
+local function CreateFakeSlider(txt)
+    local label = Instance.new("TextLabel", Content)
+    label.Size = UDim2.new(0.9, 0, 0, 20)
+    label.Text = txt
+    label.TextColor3 = Color3.fromRGB(255, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Left
 
-    local tool = player.Backpack:FindFirstChild("flash teleport") or char:FindFirstChild("flash teleport")
-    
-    if not tool then
-        for _, v in pairs(player.Backpack:GetChildren()) do
-            if v.Name:lower():find("flash") then tool = v break end
-        end
-    end
+    local bar = Instance.new("Frame", Content)
+    bar.Size = UDim2.new(0.9, 0, 0, 5)
+    bar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    bar.BorderSizePixel = 0
+end
 
-    if tool then
-        -- 1. LIMPA A MÃO
-        hum:UnequipTools()
-        task.wait(0.05)
-        
-        -- 2. DESATIVA COLISÃO TEMPORARIAMENTE (EVITA VOLTAR PARA TRÁS)
-        local connection
-        connection = game:GetService("RunService").Stepped:Connect(function()
-            for _, part in pairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end)
+CreateFakeSlider("TRIGGER 90%")
+CreateFakeSlider("BRAINROT V2 50%")
 
-        -- 3. EQUIPA E USA O ITEM
-        tool.Parent = char
-        task.wait(0.1)
-        tool:Activate()
-        
-        -- 4. DESLIZA PARA FORA
-        hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * 6)
-        
-        -- 5. REATIVA COLISÃO APÓS SAIR
-        task.delay(1, function()
-            connection:Disconnect()
-        end)
-    end
-end)
-
+-- TECLA P PARA TOGGLE
 game:GetService("UserInputService").InputBegan:Connect(function(i, g)
-    if not g and i.KeyCode == TECLA_TOGGLE then Main.Visible = not Main.Visible end
+    if not g and i.KeyCode == Enum.KeyCode.P then Main.Visible = not Main.Visible end
 end)
