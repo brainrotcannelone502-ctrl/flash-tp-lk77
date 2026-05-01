@@ -1,83 +1,114 @@
 local player = game.Players.LocalPlayer
 local sg = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-sg.Name = "BK_FINAL_FIX"
+sg.Name = "Flash_TP_LK7_V17"
 sg.ResetOnSpawn = false
 
-local AutoSteal = false
+local TECLA_TOGGLE = Enum.KeyCode.P
+local XrayAtivado = false
 
--- JANELA PRINCIPAL
 local Main = Instance.new("Frame", sg)
-Main.Size = UDim2.new(0, 250, 0, 220)
-Main.Position = UDim2.new(0.5, -125, 0.4, 0)
-Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Main.BorderSizePixel = 4
-Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
+Main.Size = UDim2.new(0, 550, 0, 380)
+Main.Position = UDim2.new(0.5, -275, 0.5, -190)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 Main.Active = true
 Main.Draggable = true
-Main.ZIndex = 1
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- TÍTULO (FORÇADO NO TOPO)
-local Title = Instance.new("TextLabel", Main)
-Title.Text = "AUTO STEAL V26"
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+local TopBar = Instance.new("Frame", Main)
+TopBar.Size = UDim2.new(1, 0, 0, 50)
+TopBar.BackgroundTransparency = 1
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Text = "FLASH TP LK7 - V17 (NO-CLIP FIX)"
+Title.Size = UDim2.new(0, 300, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.TextColor3 = Color3.fromRGB(255, 200, 0)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-Title.ZIndex = 10
+Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.BackgroundTransparency = 1
 
--- FUNÇÃO DE CRIAR BOTÃO COM CAMADA FORÇADA (ZINDEX)
-local function CreateButton(text, yPos, callback)
-    local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0.9, 0, 0, 50)
-    btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 14
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = text .. ": OFF"
-    btn.ZIndex = 20 -- Isso joga o botão para a frente de TUDO
-    
-    local state = false
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.Text = text .. (state and ": ON" or ": OFF")
-        btn.BackgroundColor3 = state and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60, 60, 60)
-        callback(state)
-    end)
+local Content = Instance.new("Frame", Main)
+Content.Size = UDim2.new(1, -20, 1, -70)
+Content.Position = UDim2.new(0, 10, 0, 60)
+Content.BackgroundColor3 = Color3.fromRGB(20, 21, 28)
+Instance.new("UICorner", Content).CornerRadius = UDim.new(0, 8)
+
+local ContentLayout = Instance.new("UIGridLayout", Content)
+ContentLayout.CellSize = UDim2.new(0.48, 0, 0, 45)
+ContentLayout.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
+ContentLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function CreateAction(name, callback)
+    local btn = Instance.new("TextButton", Content)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 36, 45)
+    btn.Text = name
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 13
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    btn.MouseButton1Click:Connect(callback)
 end
 
--- LÓGICA DE ROUBO IGUAL AO VÍDEO
-player.CharacterChildAdded:Connect(function(child)
-    if AutoSteal and child:IsA("Tool") and not child.Name:lower():find("flash") then
-        local char = player.Character
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local flash = player.Backpack:FindFirstChild("flash teleport") or char:FindFirstChild("flash teleport")
-
-        if flash and hrp then
-            task.wait(0.02)
-            hum:UnequipTools()
-            task.wait(0.02)
-            flash.Parent = char
-            flash:Activate()
-            hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * -35)
-            hrp.Velocity = Vector3.new(0, 0, 0)
-        end
-    end
-end)
-
--- CRIANDO OS BOTÕES EM POSIÇÕES EXATAS
-CreateButton("FLASH TP AUTO", 60, function(v) AutoSteal = v end)
-CreateButton("X-RAY BASES", 120, function(v)
+CreateAction("Visual: Bases X-Ray", function()
+    XrayAtivado = not XrayAtivado
     for _, obj in pairs(game.Workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and (obj.Name:find("Wall") or obj.Name:find("Gate")) then
-            obj.Transparency = v and 0.8 or 0
+        if obj:IsA("BasePart") and not obj:IsDescendantOf(player.Character) then
+            if XrayAtivado then
+                if obj.Transparency < 0.5 then
+                    obj.Transparency = 0.7
+                    obj.Material = Enum.Material.ForceField
+                end
+            else
+                obj.Transparency = 0
+                obj.Material = Enum.Material.Plastic
+            end
         end
     end
 end)
 
--- TECLA P PARA ESCONDER
+CreateAction("Flash Instantâneo", function()
+    local char = player.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hum or not hrp then return end
+
+    local tool = player.Backpack:FindFirstChild("flash teleport") or char:FindFirstChild("flash teleport")
+    
+    if not tool then
+        for _, v in pairs(player.Backpack:GetChildren()) do
+            if v.Name:lower():find("flash") then tool = v break end
+        end
+    end
+
+    if tool then
+        -- 1. LIMPA A MÃO
+        hum:UnequipTools()
+        task.wait(0.05)
+        
+        -- 2. DESATIVA COLISÃO TEMPORARIAMENTE (EVITA VOLTAR PARA TRÁS)
+        local connection
+        connection = game:GetService("RunService").Stepped:Connect(function()
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end)
+
+        -- 3. EQUIPA E USA O ITEM
+        tool.Parent = char
+        task.wait(0.1)
+        tool:Activate()
+        
+        -- 4. DESLIZA PARA FORA
+        hrp.CFrame = hrp.CFrame + (hrp.CFrame.LookVector * 6)
+        
+        -- 5. REATIVA COLISÃO APÓS SAIR
+        task.delay(1, function()
+            connection:Disconnect()
+        end)
+    end
+end)
+
 game:GetService("UserInputService").InputBegan:Connect(function(i, g)
-    if not g and i.KeyCode == Enum.KeyCode.P then Main.Visible = not Main.Visible end
+    if not g and i.KeyCode == TECLA_TOGGLE then Main.Visible = not Main.Visible end
 end)
